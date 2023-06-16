@@ -16,7 +16,7 @@ public class SaveProductController {
     @PostMapping("/saveProduct")
     public String saveProduct(@RequestBody String productDetails) throws IOException {
         Path fileName = Path.of(
-            "/Users/megha.sisode/workspace/DockerAndK8sApp/productInfo.txt");
+            "/app/data/productInfo.txt");
         try (BufferedWriter out = new BufferedWriter(
                 new FileWriter(String.valueOf(fileName), true))) {
                 out.write(productDetails);
