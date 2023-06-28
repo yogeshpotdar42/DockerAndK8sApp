@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springbootapp
+  labels:
+    app: springbootapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springbootapp
+  template:
+    metadata:
+      labels:
+        app: springbootapp
+    spec:
+      containers:
+      - name: springbootapp
+        image: yogeshpotdar42/springbootapp:1.0
+        ports:
+        - name: 8080tcp
+          containerPort: 8080
+          protocol: TCP
+        command:
+        - java
+        args:
+        - "-jar"
+        - "/app/target/DockerAndK8sApp.jar"
+        volumeMounts:
+        - name: data-vol
+          mountPath: /app/data
+      volumes:
+      - name: data-vol
+        persistentVolumeClaim:
+          claimName: data-volume-claim
+---
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: springboot-k8s-svc
+spec:
+  selector:
+    app: springbootapp
+  ports:
+    - protocol: "TCP"
+      port: 8080 # The port that the service is running on in the cluster
+      targetPort: 8080 # The port exposed by the service
+  type: LoadBalancer # type of the service  
+        
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-volume-claim
+spec: 
+  accessModes:
+    - ReadWriteOnce
+  resources: 
+    requests:
+      storage: 1Gi
+---
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: data-storage
+provisioner: k8s.io/minikube-hostpath
+volumeBindingMode: Immediate
